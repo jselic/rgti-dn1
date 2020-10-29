@@ -6,6 +6,69 @@ const ctx = canvas.getContext('2d');
 /*Global variables definition*/
 var vertices = [];
 var triangles = [];
+var rotationByX=0;
+var rotationByY=0;
+var rotationByZ=0;
+var translationOnX = 0;
+var translationOnY = 0;
+var translationOnZ = 0;
+var scaleOnX = 1;
+var scaleOnY = 1;
+var scaleOnZ = 1;
+var perspectiveView = 1;
+
+/*Tools for responsive controls*/
+document.getElementById('rotXControls').addEventListener('change',function(){
+    document.getElementById('labelRotX').innerHTML = this.value;
+    rotationByX=this.value;
+    draw();
+});
+document.getElementById('rotYControls').addEventListener('change',function(){
+    document.getElementById('labelRotY').innerHTML = this.value;
+    rotationByY=this.value;
+    draw();
+});
+document.getElementById('rotZControls').addEventListener('change',function(){
+    document.getElementById('labelRotZ').innerHTML = this.value;
+    rotationByZ=this.value;
+    draw();
+});
+document.getElementById('transXControls').addEventListener('change',function(){
+    document.getElementById('labelTransX').innerHTML = this.value-10;
+    translationOnX=this.value;
+    draw();
+});
+document.getElementById('transYControls').addEventListener('change',function(){
+    document.getElementById('labelTransY').innerHTML = this.value-10;
+    translationOnY=this.value;
+    draw();
+});
+document.getElementById('transZControls').addEventListener('change',function(){
+    document.getElementById('labelTransZ').innerHTML = this.value-10;
+    translationOnZ=this.value;
+    draw();
+});
+document.getElementById('scaXControls').addEventListener('change',function(){
+    document.getElementById('labelScaX').innerHTML = this.value;
+    scaleOnX=this.value;
+    draw();
+});
+document.getElementById('scaYControls').addEventListener('change',function(){
+    document.getElementById('labelScaY').innerHTML = this.value;
+    scaleOnY=this.value;
+    draw();
+});
+document.getElementById('scaZControls').addEventListener('change',function(){
+    document.getElementById('labelScaZ').innerHTML = this.value;
+    scaleOnZ=this.value;
+    draw();
+});
+document.getElementById('persControls').addEventListener('change',function(){
+    document.getElementById('labelPers').innerHTML = this.value;
+    perspectiveView=this.value;
+    draw();
+});
+
 
 /*Event listener for the file upolad element for metadata*/
 const fileSelector = document.getElementById('filePath');
@@ -63,16 +126,19 @@ function readFile(input){
 
 
 function draw(){
-    /*Mergin matrixes into a matrix mesh*/
-    var mesh = glMatrix.mat4.create();
-    glMatrix.mat4.multiply(mesh,scale(1,1,1),rotateX(1));
-    glMatrix.mat4.multiply(mesh,mesh,rotateY(1));
-    glMatrix.mat4.multiply(mesh,mesh,rotateZ(1));
-    glMatrix.mat4.multiply(mesh,mesh,translate(40,50,50));
-    glMatrix.mat4.multiply(mesh,mesh,cameraView(0,0,-8));
-    glMatrix.mat4.multiply(mesh,mesh,perspective(1));
+    /*Clear canvas of previous drawings*/
+    ctx.clearRect(0,0,canvas.clientWidth,canvas.height);
 
-    /*Transforming vertices*/
+    /*Applying matrix transformations*/
+    var mesh = glMatrix.mat4.create();
+    glMatrix.mat4.multiply(mesh,scale(scaleOnX,scaleOnY,scaleOnZ),rotateX(rotationByX));
+    glMatrix.mat4.multiply(mesh,mesh,rotateY(rotationByY));
+    glMatrix.mat4.multiply(mesh,mesh,rotateZ(rotationByZ));
+    glMatrix.mat4.multiply(mesh,mesh,translate(translationOnX,translationOnY,translationOnZ));
+    glMatrix.mat4.multiply(mesh,mesh,cameraView(0,0,-8));
+    glMatrix.mat4.multiply(mesh,mesh,perspective(perspectiveView));
+
+    /*Transforming vertices (manually, because stupid mat4 doesn't have the function :/)*/
     for(var i = 0;i<vertices.length;i++){
         for(var j = 0;j<4;j++){
             vertices[i][j] = mesh[j*4+0]*vertices[i][0] + mesh[j*4+1]*vertices[i][1] + mesh[j*4+2]*vertices[i][2] + mesh[j*4+3]*vertices[i][3];
@@ -110,8 +176,8 @@ function draw(){
                 vertices[line]=[words[1],words[2],words[3],1];
             }
         }
-        console.log(vertices);
-        console.log(triangles);
+        //console.log(vertices);
+        //console.log(triangles);
 
         
         
