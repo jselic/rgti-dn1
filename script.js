@@ -4,6 +4,7 @@ const ctx = canvas.getContext('2d');
 
 
 /*Global variables definition*/
+var debugOffset = 50;
 var vertices = [];
 var triangles = [];
 var rotationByX=0;
@@ -15,7 +16,7 @@ var translationOnZ = 0;
 var scaleOnX = 1;
 var scaleOnY = 1;
 var scaleOnZ = 1;
-var perspectiveView = 1;
+var perspectiveView = 4;
 
 /*Tools for responsive controls*/
 document.getElementById('rotXControls').addEventListener('change',function(){
@@ -46,6 +47,9 @@ document.getElementById('transYControls').addEventListener('change',function(){
 document.getElementById('transZControls').addEventListener('change',function(){
     document.getElementById('labelTransZ').innerHTML = this.value-10;
     translationOnZ=this.value;
+    /*scaleOnX=this.value/20;
+    scaleOnY=this.value/20;
+    scaleOnZ=this.value/20;*/
     draw();
 });
 document.getElementById('scaXControls').addEventListener('change',function(){
@@ -111,19 +115,18 @@ function readFile(input){
         for(var line = 0; line<lines.length; line++){
             var words = lines[line].split(' ');
             if (words[0]=="v"){
-                vertices.push([words[1],words[2],words[3],1]);
+                vertices.push([Number(words[1])*debugOffset,Number(words[2]*debugOffset),Number(words[3]*debugOffset),1]);
             }else if (words[0]=="f"){
                 triangles.push([words[1],words[2],words[3]]);
             }
         }
-        console.log(vertices);
-        console.log(triangles);
+        //console.log(vertices);
+        //console.log(triangles);
 
         
         
     };
 }
-
 
 function draw(){
     /*Clear canvas of previous drawings*/
@@ -141,25 +144,31 @@ function draw(){
     /*Transforming vertices (manually, because stupid mat4 doesn't have the function :/)*/
     for(var i = 0;i<vertices.length;i++){
         for(var j = 0;j<4;j++){
-            vertices[i][j] = mesh[j*4+0]*vertices[i][0] + mesh[j*4+1]*vertices[i][1] + mesh[j*4+2]*vertices[i][2] + mesh[j*4+3]*vertices[i][3];
+            vertices[i][j] = mesh[j*4+0]*vertices[i][0] + 
+                             mesh[j*4+1]*vertices[i][1] + 
+                             mesh[j*4+2]*vertices[i][2] + 
+                             mesh[j*4+3]*vertices[i][3];
         }
     }
 
     /*And normalizing them*/
-        /*for(var i = 0;i<vertices.length;i++){
-            for(var j = 0;j<4;j++){
-                vertices[i][j]/=vertices[i][3];
-            }
-        }*/
+    /*for(var i = 0;i<vertices.length;i++){
+       for(var j = 0;j<4;j++){
+           if(vertices[i][3]!=0){
+               vertices[i][j]/=(vertices[i][3]);
+           }     
+       }
+    }*/
 
-
+    var offsetX = 110//Number(canvas.clientWidth/5);
+    var offsetY = 50//Number(canvas.clientHeight/5);
     /*Drawing triangles*/
     for(var i = 0;i<triangles.length;i++){
         ctx.beginPath();
-        ctx.moveTo(vertices[triangles[i][0]-1][0],vertices[triangles[i][0]-1][1]);
-        ctx.lineTo(vertices[triangles[i][1]-1][0],vertices[triangles[i][1]-1][1]);
-        ctx.lineTo(vertices[triangles[i][2]-1][0],vertices[triangles[i][2]-1][1]);
-        ctx.lineTo(vertices[triangles[i][0]-1][0],vertices[triangles[i][0]-1][1]);
+        ctx.moveTo(vertices[triangles[i][0]-1][0] + offsetX,vertices[triangles[i][0]-1][1] + offsetY);
+        ctx.lineTo(vertices[triangles[i][1]-1][0] + offsetX,vertices[triangles[i][1]-1][1] + offsetY);
+        ctx.lineTo(vertices[triangles[i][2]-1][0] + offsetX,vertices[triangles[i][2]-1][1] + offsetY);
+        ctx.lineTo(vertices[triangles[i][0]-1][0] + offsetX,vertices[triangles[i][0]-1][1] + offsetY);
         ctx.stroke();
     }
 
@@ -173,7 +182,7 @@ function draw(){
         for(var line = 0; line<lines.length; line++){
             var words = lines[line].split(' ');
             if (words[0]=="v"){
-                vertices[line]=[words[1],words[2],words[3],1];
+                vertices[line]=[words[1]*debugOffset,words[2]*debugOffset,words[3]*debugOffset,1];
             }
         }
         //console.log(vertices);
